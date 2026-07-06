@@ -13,8 +13,8 @@
 
 /** @type {Socials} */
 export const socials = {
-  github: "https://github.com/sprkarunya986", // Placeholder using email suffix
-  linkedin: "https://linkedin.com/in/sprkarunya986", // Placeholder using email suffix
+  github: "https://github.com/Karunyaram07", // Placeholder using email suffix
+  linkedin: "https://www.linkedin.com/in/prabhu-ram-karunya-sunkara-11986528a", // Placeholder using email suffix
   email: "sprkarunya986@gmail.com",
   twitter: "",
   instagram: "",

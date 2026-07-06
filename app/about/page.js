@@ -17,33 +17,57 @@ import {
   FiBriefcase, 
   FiDownload 
 } from "react-icons/fi"
-import { TbSparkles, TbTrophy, TbGraduationCap } from "react-icons/tb"
+import { TbSparkles, TbTrophy } from "react-icons/tb"
 import { profile } from "@/data/profile"
 import { education } from "@/data/education"
 import { experience } from "@/data/experience"
-import { skills } from "@/data/skills"
 import { navigation } from "@/data/navigation"
 import { variants, transitions } from "@/config/animations"
+import EducationRoadmap from "../components/EducationRoadmap"
+import OrbitalSkills from "../components/OrbitalSkills"
 
 export default function AboutPage() {
   const { theme, setTheme, resolvedTheme } = useTheme()
   const [mounted, setMounted] = React.useState(false)
-  const [activeCategory, setActiveCategory] = React.useState("All")
+
+  const [telemetryLogs, setTelemetryLogs] = React.useState([
+    { text: ">> Initializing profile connection...", type: "info" },
+    { text: ">> Loading credentials... [OK]", type: "success" },
+    { text: ">> Mapping B.Tech CSE telemetry...", type: "info" }
+  ])
 
   React.useEffect(() => {
     const timer = setTimeout(() => setMounted(true), 0)
     return () => clearTimeout(timer)
   }, [])
 
+  React.useEffect(() => {
+    if (!mounted) return
+    const feed = [
+      "loading Google Genkit AI modules...",
+      "compiling static portfolio pathways...",
+      "active internship search: listening...",
+      "LiDAR/radar metrics synced successfully",
+      "indexing co-authored research paper...",
+      "active focus: full-stack AI dev loop",
+      "HappySoul digital companion in progress",
+      "Green Track complaint workflow active"
+    ]
+    let idx = 0
+    const interval = setInterval(() => {
+      setTelemetryLogs(prev => {
+        const next = [...prev, { text: `>> ${feed[idx % feed.length]}`, type: "info" }]
+        if (next.length > 5) next.shift()
+        return next
+      })
+      idx++
+    }, 3800)
+    return () => clearInterval(interval)
+  }, [mounted])
+
   if (!mounted) {
     return <div className="p-8 text-center font-mono text-text-muted">Loading profile...</div>
   }
-
-  // Group skills or extract categories
-  const skillCategories = ["All", ...new Set(skills.map(s => s.category))]
-  const filteredSkills = activeCategory === "All" 
-    ? skills 
-    : skills.filter(s => s.category === activeCategory)
 
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300 antialiased selection:bg-accent/30">
@@ -81,16 +105,33 @@ export default function AboutPage() {
             <span className="text-caption font-mono text-accent bg-accent/5 border border-accent/15 px-3 py-1 rounded-full self-start font-semibold">
               ABOUT // NARRATIVE
             </span>
-            <h1 className="text-display-lg font-black tracking-tighter leading-none">
-              Sunkara Prabhu <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-gradient-start to-gradient-end">Ram Karunya</span>
+            <h1 className="text-display-lg font-black tracking-tighter leading-none uppercase">
+              Prabhu Ram <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-gradient-start to-gradient-end">Karunya Sunkara</span>
             </h1>
             <h2 className="text-heading-2 font-mono text-text-secondary font-semibold">
               {profile.professionalTitle}
             </h2>
-            <p className="text-body text-text-secondary leading-relaxed font-light">
-              {profile.bio}
-            </p>
+            <div className="flex flex-col gap-5 text-body text-text-secondary leading-relaxed font-light font-sans">
+              {profile.bioParagraphs.map((para, pIdx) => {
+                if (pIdx === profile.bioParagraphs.length - 1) {
+                  return (
+                    <p key={pIdx}>
+                      If that sounds like a fit, reach me at{" "}
+                      <a href="mailto:sprkarunya986@gmail.com" className="text-accent underline font-semibold hover:brightness-110">
+                        sprkarunya986@gmail.com
+                      </a>{" "}
+                      or send a{" "}
+                      <Link href="/contact" className="text-accent underline font-bold hover:brightness-110">
+                        connection request here
+                      </Link>
+                      . I reply here.
+                    </p>
+                  )
+                }
+                return <p key={pIdx}>{para}</p>
+              })}
+            </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
               <div className="flex items-center gap-3 text-caption font-mono text-text-muted">
@@ -104,8 +145,10 @@ export default function AboutPage() {
             </div>
           </div>
 
-          {/* Styled Avatar Card */}
-          <div className="md:col-span-5 flex justify-center">
+          {/* Right column: Avatar + System Telemetry Widgets */}
+          <div className="md:col-span-5 flex flex-col items-center gap-6 lg:sticky lg:top-24">
+            
+            {/* Styled Avatar Card */}
             <div className="relative w-full max-w-[320px] aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl border border-border bg-gradient-to-tr from-accent/20 to-purple-500/10 p-2 group">
               <div className="w-full h-full rounded-2xl overflow-hidden relative">
                 <img 
@@ -121,6 +164,51 @@ export default function AboutPage() {
                 </div>
               </div>
             </div>
+
+            {/* High-Tech Telemetry Terminal Widget */}
+            <div className="w-full max-w-[320px] border border-border bg-black/40 dark:bg-black/60 rounded-2xl p-4 font-mono text-[9px] text-text-secondary shadow-lg relative overflow-hidden text-left">
+              <div className="flex justify-between items-center border-b border-border/40 pb-2 mb-2 select-none">
+                <span className="text-accent font-bold uppercase tracking-widest text-[8px] flex items-center gap-1">
+                  <span className="size-1.5 rounded-full bg-accent animate-pulse" /> Live_Telemetry_Feed
+                </span>
+                <span className="text-text-muted text-[7px]">CORE_v1.0.8</span>
+              </div>
+              <div className="flex flex-col gap-1.5 h-32 overflow-hidden">
+                {telemetryLogs.map((log, idx) => (
+                  <motion.div
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    key={idx}
+                    className={`leading-tight font-mono ${
+                      log.type === "success" ? "text-accent" : "text-text-secondary"
+                    }`}
+                  >
+                    {log.text}
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+            {/* Quick Metrics Grid */}
+            <div className="w-full max-w-[320px] grid grid-cols-2 gap-4 font-mono text-center">
+              <div className="p-4 border border-border bg-[#0b0c10]/5 dark:bg-[#ffffff]/[0.02] rounded-2xl flex flex-col justify-between min-h-20 select-none">
+                <span className="text-heading-2 font-black text-accent">{profile.currentCGPA}</span>
+                <span className="text-[8px] text-text-muted uppercase tracking-wider">CGPA_SCORE</span>
+              </div>
+              <div className="p-4 border border-border bg-[#0b0c10]/5 dark:bg-[#ffffff]/[0.02] rounded-2xl flex flex-col justify-between min-h-20 select-none">
+                <span className="text-heading-2 font-black text-accent">SIH &apos;25</span>
+                <span className="text-[8px] text-text-muted uppercase tracking-wider">GRAND_CHAMP</span>
+              </div>
+              <div className="p-4 border border-border bg-[#0b0c10]/5 dark:bg-[#ffffff]/[0.02] rounded-2xl flex flex-col justify-between min-h-20 select-none">
+                <span className="text-heading-2 font-black text-accent">1</span>
+                <span className="text-[8px] text-text-muted uppercase tracking-wider">PUB_PAPER</span>
+              </div>
+              <div className="p-4 border border-border bg-[#0b0c10]/5 dark:bg-[#ffffff]/[0.02] rounded-2xl flex flex-col justify-between min-h-20 select-none">
+                <span className="text-heading-2 font-black text-accent">4+</span>
+                <span className="text-[8px] text-text-muted uppercase tracking-wider">SYS_DEPLOYS</span>
+              </div>
+            </div>
+
           </div>
         </section>
 
@@ -163,82 +251,14 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* Filterable Skills Grid */}
+        {/* Orbital Skills Section */}
         <section className="flex flex-col gap-8">
-          <div className="flex flex-col md:flex-row justify-between md:items-end gap-4">
-            <div>
-              <span className="text-caption font-mono text-accent uppercase tracking-widest">ABILITIES</span>
-              <h2 className="text-heading-1 font-bold mt-1">Core Tech Stack</h2>
-            </div>
-            
-            {/* Category tabs */}
-            <div className="flex flex-wrap gap-1.5 bg-muted p-1 rounded-full border border-border">
-              {skillCategories.map((cat, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setActiveCategory(cat)}
-                  className={`px-4 py-1.5 text-caption font-mono rounded-full transition-all ${activeCategory === cat ? "bg-background text-accent shadow-xs font-bold" : "text-text-muted hover:text-foreground"}`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            {filteredSkills.map((skill, idx) => (
-              <div 
-                key={idx} 
-                className="p-5 bg-[#0b0c10]/5 dark:bg-[#ffffff]/[0.02] border border-border hover:border-accent/40 rounded-2xl flex flex-col justify-between gap-3 group transition-all duration-300"
-              >
-                <div>
-                  <span className="text-[10px] font-mono text-accent uppercase tracking-widest bg-accent/5 border border-accent/15 px-2.5 py-0.5 rounded-full">
-                    {skill.level}
-                  </span>
-                  <h4 className="text-heading-3 font-bold text-foreground mt-3 group-hover:text-accent transition-colors">
-                    {skill.name}
-                  </h4>
-                </div>
-                <span className="text-caption font-mono text-text-muted">
-                  {skill.category.toUpperCase()}
-                </span>
-              </div>
-            ))}
-          </div>
+          <OrbitalSkills />
         </section>
 
-        {/* Education Timeline */}
+        {/* Education Journey Roadmap Section */}
         <section className="flex flex-col gap-8">
-          <div>
-            <span className="text-caption font-mono text-accent uppercase tracking-widest">FOUNDATIONS</span>
-            <h2 className="text-heading-1 font-bold mt-1">Education & Academics</h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {education.map((edu, idx) => (
-              <div key={idx} className="p-6 border border-border bg-[#0b0c10]/5 dark:bg-[#ffffff]/[0.02] rounded-2xl flex flex-col justify-between min-h-60">
-                <div className="flex flex-col gap-2">
-                  <div className="flex justify-between items-start gap-2">
-                    <span className="text-[10px] font-mono text-accent font-bold bg-accent/10 border border-accent/20 px-2 py-0.5 rounded-sm">
-                      {edu.duration}
-                    </span>
-                    <span className="text-caption font-mono font-bold text-emerald-500">
-                      {edu.score}
-                    </span>
-                  </div>
-                  <h3 className="text-heading-3 font-bold text-foreground mt-2 leading-tight">
-                    {edu.degree}
-                  </h3>
-                  <p className="text-caption font-mono text-text-muted">
-                    {edu.institution} &bull; {edu.location}
-                  </p>
-                </div>
-                <p className="text-small text-text-secondary leading-relaxed mt-4 font-light">
-                  {edu.description}
-                </p>
-              </div>
-            ))}
-          </div>
+          <EducationRoadmap />
         </section>
 
       </main>
