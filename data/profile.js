@@ -33,7 +33,7 @@ export const profile = {
   specialization: "Computer Science and Engineering",
   graduationYear: 2027,
   currentCGPA: 9.52,
-  profileImagePath: "/images/hero/avatar.jpg",
+  profileImagePath: "/images/hero/avatar.png",
   resumePath: "/my_resume.pdf",
   availability: "Available for Internships, Research Collaborations, and Freelance Projects",
   bio: "I am a Computer Science undergraduate with deep interests in web development, artificial intelligence, and software engineering. I have hands-on experience developing end-to-end web architectures, integrating large language models, and conducting academic research. I am eager to apply my technical skills to build tools that solve real-world problems.",
