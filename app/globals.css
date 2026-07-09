@@ -10,7 +10,7 @@
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
   --font-heading: var(--font-sans);
-  
+
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -27,7 +27,7 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  
+
   /* Custom Semantic Additions */
   --color-success: var(--success);
   --color-success-foreground: var(--success-foreground);
@@ -36,11 +36,11 @@
   --color-error: var(--error);
   --color-error-foreground: var(--error-foreground);
   --color-surface: var(--surface);
-  
+
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);
   --color-text-muted: var(--text-muted);
-  
+
   --color-glass-bg: var(--glass-bg);
   --color-glass-border: var(--glass-border);
 
@@ -69,12 +69,12 @@
   --primary-foreground: oklch(0.985 0.003 220);
   --secondary: oklch(0.94 0.006 220);
   --secondary-foreground: oklch(0.20 0.01 220);
-  
+
   --muted: oklch(0.95 0.004 220);
   --muted-foreground: oklch(0.42 0.01 220);
-  --accent: oklch(0.58 0.16 165);
+  --accent: oklch(45.046% 0.19292 343.341);
   --accent-foreground: oklch(0.985 0.003 220);
-  
+
   --success: oklch(0.85 0.11 160);
   --success-foreground: oklch(0.15 0.04 160);
   --warning: oklch(0.82 0.12 85);
@@ -82,22 +82,22 @@
   --error: oklch(0.65 0.16 28);
   --error-foreground: oklch(0.99 0.003 28);
   --destructive: oklch(0.65 0.16 28);
-  
+
   --border: oklch(0.90 0.006 220);
   --input: oklch(0.90 0.006 220);
-  --ring: oklch(0.58 0.16 165);
+  --ring: oklch(45.046% 0.19292 343.341);
   --radius: 0.625rem;
-  
+
   --surface: oklch(0.975 0.004 220);
   --text-primary: oklch(0.12 0.008 220);
   --text-secondary: oklch(0.32 0.01 220);
   --text-muted: oklch(0.52 0.01 220);
-  
+
   --glass-bg: rgba(255, 255, 255, 0.65);
   --glass-border: rgba(0, 0, 0, 0.06);
-  
+
   --gradient-start: oklch(0.12 0.008 220);
-  --gradient-end: oklch(0.58 0.16 165);
+  --gradient-end: oklch(45.046% 0.19292 343.341);
 }
 
 .dark {
@@ -112,12 +112,12 @@
   --primary-foreground: oklch(0.12 0.012 250);
   --secondary: oklch(0.17 0.014 250);
   --secondary-foreground: oklch(0.96 0.004 220);
-  
+
   --muted: oklch(0.16 0.014 250);
   --muted-foreground: oklch(0.62 0.005 220);
   --accent: oklch(0.72 0.16 165);
   --accent-foreground: oklch(0.12 0.012 250);
-  
+
   --success: oklch(0.85 0.11 160);
   --success-foreground: oklch(0.12 0.012 160);
   --warning: oklch(0.82 0.12 85);
@@ -125,19 +125,19 @@
   --error: oklch(0.65 0.16 28);
   --error-foreground: oklch(0.98 0.01 28);
   --destructive: oklch(0.65 0.16 28);
-  
+
   --border: oklch(0.20 0.012 250 / 60%);
   --input: oklch(0.20 0.012 250 / 80%);
   --ring: oklch(0.72 0.16 165);
-  
+
   --surface: oklch(0.14 0.012 250);
   --text-primary: oklch(0.96 0.004 220);
   --text-secondary: oklch(0.78 0.005 220);
   --text-muted: oklch(0.58 0.005 220);
-  
+
   --glass-bg: rgba(14, 15, 19, 0.7);
   --glass-border: rgba(255, 255, 255, 0.08);
-  
+
   --gradient-start: oklch(0.96 0.004 220);
   --gradient-end: oklch(0.72 0.16 165);
 }
@@ -146,9 +146,11 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+
   html {
     @apply font-sans antialiased;
   }
@@ -234,6 +236,7 @@
 
 @utility glass-hover {
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
   &:hover {
     background-color: rgba(255, 255, 255, 0.03);
     border-color: rgba(255, 255, 255, 0.12);
@@ -284,17 +287,35 @@
   color: oklch(0.95 0.003 240);
 }
 
-.cube-face.front  { transform: rotateY(0deg) translateZ(40px); }
-.cube-face.back   { transform: rotateY(180deg) translateZ(40px); }
-.cube-face.left   { transform: rotateY(-90deg) translateZ(40px); }
-.cube-face.right  { transform: rotateY(90deg) translateZ(40px); }
-.cube-face.top    { transform: rotateX(90deg) translateZ(40px); }
-.cube-face.bottom { transform: rotateX(-90deg) translateZ(40px); }
+.cube-face.front {
+  transform: rotateY(0deg) translateZ(40px);
+}
+
+.cube-face.back {
+  transform: rotateY(180deg) translateZ(40px);
+}
+
+.cube-face.left {
+  transform: rotateY(-90deg) translateZ(40px);
+}
+
+.cube-face.right {
+  transform: rotateY(90deg) translateZ(40px);
+}
+
+.cube-face.top {
+  transform: rotateX(90deg) translateZ(40px);
+}
+
+.cube-face.bottom {
+  transform: rotateX(-90deg) translateZ(40px);
+}
 
 @keyframes rotateCube {
   0% {
     transform: rotateX(0deg) rotateY(0deg);
   }
+
   100% {
     transform: rotateX(360deg) rotateY(360deg);
   }
@@ -302,8 +323,13 @@
 
 /* Radar scan animation */
 @keyframes scan {
-  0% { transform: translateY(-100%); }
-  100% { transform: translateY(100%); }
+  0% {
+    transform: translateY(-100%);
+  }
+
+  100% {
+    transform: translateY(100%);
+  }
 }
 
 .scanline {

@@ -1,13 +1,13 @@
 "use client"
 
 import * as React from "react"
-import { motion, AnimatePresence, useScroll, useSpring, useMotionValueEvent } from "framer-motion"
-import { 
-  FiMapPin, 
-  FiAward, 
-  FiBookOpen, 
-  FiBriefcase, 
-  FiArrowRight, 
+import { motion, AnimatePresence, useScroll, useSpring, useMotionValueEvent, useMotionValue, animate } from "framer-motion"
+import {
+  FiMapPin,
+  FiAward,
+  FiBookOpen,
+  FiBriefcase,
+  FiArrowRight,
   FiStar,
   FiFlag,
   FiMonitor
@@ -64,8 +64,8 @@ const milestones = [
     id: "research",
     year: "2025 - 2026",
     title: "Research & Publication",
-    institution: "MulticoreWare Collaboration",
-    location: "KARE Campus Labs",
+    institution: "",
+    location: "",
     score: "ICTIEE 2026 Accept",
     description: "Co-authored research on Prompt Engineering Pedagogy (PEARL) accepted at ICTIEE 2026. Handled radar/LiDAR sensor fusion data utilizing nuScenes datasets.",
     color: "cyan",
@@ -109,16 +109,38 @@ export default function EducationRoadmap() {
   })
 
   const [scrollVal, setScrollVal] = React.useState(0)
+  const [maxScrollVal, setMaxScrollVal] = React.useState(0)
   const [activeMilestone, setActiveMilestone] = React.useState(milestones[0])
   const [hoveredMilestone, setHoveredMilestone] = React.useState(null)
+
+  // Custom pathProgress motion value driven by scroll OR clicked to animate to a specific milestone
+  const pathProgress = useMotionValue(0)
 
   // Sync scroll motion values to state for conditional pin rendering and active states
   useMotionValueEvent(smoothProgress, "change", (latest) => {
     setScrollVal(latest)
+
+    // Maintain the furthest scroll position to keep unlocked pins active and visible
+    setMaxScrollVal((prev) => {
+      const nextMax = Math.max(prev, latest)
+      pathProgress.set(nextMax)
+      return nextMax
+    })
+
     // Find the furthest milestone that the scroll path has crossed
     const active = [...milestones].reverse().find(m => latest >= m.threshold) || milestones[0]
     setActiveMilestone(active)
   })
+
+  const handleMilestoneClick = (m) => {
+    setActiveMilestone(m)
+    setMaxScrollVal((prev) => Math.max(prev, m.threshold))
+    animate(pathProgress, m.threshold, {
+      type: "spring",
+      stiffness: 80,
+      damping: 20
+    })
+  }
 
   const displayMilestone = hoveredMilestone || activeMilestone
 
@@ -181,60 +203,78 @@ export default function EducationRoadmap() {
           <span className="text-caption font-mono text-accent uppercase tracking-widest">FOUNDATIONS</span>
           <h2 className="text-heading-1 font-bold mt-1">Education Journey Roadmap</h2>
         </div>
-        <span className="hidden md:inline font-mono text-[10px] text-text-muted">SCROLL TO DRAW PATH &bull; HOVER PINS TO INSPECT</span>
+        <span className="hidden md:inline font-mono text-[10px] text-text-muted">SCROLL OR CLICK PINS TO DRAW &bull; HOVER FOR PREVIEW</span>
       </div>
 
       {/* Desktop Roadmap view (side-by-side grid layout) */}
       <div className="hidden md:grid grid-cols-12 gap-8 items-stretch w-full">
-        
+
         {/* Left column: SVG winding road map box */}
         <div className="col-span-8 relative h-[520px] border border-border/80 bg-card rounded-[32px] overflow-hidden shadow-[6px_6px_0px_#000000] dark:shadow-[6px_6px_0px_var(--accent)] p-6">
           {/* Asphalt road grid path overlay */}
           <div className="absolute inset-0 opacity-[0.02] bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:16px_16px] pointer-events-none" />
 
           {/* Winding Highway SVG */}
-          <svg 
-            className="absolute inset-0 w-full h-full pointer-events-none" 
-            viewBox="0 0 1000 550" 
-            fill="none" 
+          <svg
+            className="absolute inset-0 w-full h-full pointer-events-none"
+            viewBox="0 0 1000 550"
+            fill="none"
             xmlns="http://www.w3.org/2000/svg"
           >
+            <defs>
+              <linearGradient id="road-gradient" x1="0%" y1="100%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#10b981" />
+                <stop offset="25%" stopColor="#f59e0b" />
+                <stop offset="55%" stopColor="#3b82f6" />
+                <stop offset="75%" stopColor="#06b6d4" />
+                <stop offset="100%" stopColor="#f43f5e" />
+              </linearGradient>
+              <filter id="neon-glow" x="-10%" y="-10%" width="120%" height="120%">
+                <feGaussianBlur stdDeviation="5" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+
             {/* Main roadbed guide layout */}
-            <path 
-              d="M 50,450 C 200,450 250,280 350,280 C 450,280 500,430 650,430 C 780,430 550,130 680,130 C 780,130 800,220 950,220" 
-              stroke="currentColor" 
-              strokeWidth="28" 
+            <path
+              d="M 50,450 C 200,450 250,280 350,280 C 450,280 500,430 650,430 C 780,430 550,130 680,130 C 780,130 800,220 950,220"
+              stroke="currentColor"
+              strokeWidth="28"
               className="text-muted/15 dark:text-muted/10"
               strokeLinecap="round"
             />
             {/* Street center-lane divider guide */}
-            <path 
-              d="M 50,450 C 200,450 250,280 350,280 C 450,280 500,430 650,430 C 780,430 550,130 680,130 C 780,130 800,220 950,220" 
-              stroke="currentColor" 
-              strokeWidth="1.5" 
-              strokeDasharray="6,8" 
+            <path
+              d="M 50,450 C 200,450 250,280 350,280 C 450,280 500,430 650,430 C 780,430 550,130 680,130 C 780,130 800,220 950,220"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeDasharray="6,8"
               className="text-muted/30 dark:text-muted/20"
               strokeLinecap="round"
             />
 
             {/* Active Winding path (glowing neon line that draws in on scroll) */}
-            <motion.path 
-              d="M 50,450 C 200,450 250,280 350,280 C 450,280 500,430 650,430 C 780,430 550,130 680,130 C 780,130 800,220 950,220" 
-              stroke="var(--accent)" 
-              strokeWidth="3.5" 
-              style={{ pathLength: smoothProgress }}
-              className="opacity-90 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]"
+            <motion.path
+              d="M 50,450 C 200,450 250,280 350,280 C 450,280 500,430 650,430 C 780,430 550,130 680,130 C 780,130 800,220 950,220"
+              stroke="url(#road-gradient)"
+              strokeWidth="4.5"
+              style={{ pathLength: pathProgress }}
+              filter="url(#neon-glow)"
+              className="opacity-95"
               strokeLinecap="round"
             />
 
             {/* Center street divider line (draws dynamically on scroll) */}
-            <motion.path 
-              d="M 50,450 C 200,450 250,280 350,280 C 450,280 500,430 650,430 C 780,430 550,130 680,130 C 780,130 800,220 950,220" 
-              stroke="#ffffff" 
-              strokeWidth="1.5" 
-              strokeDasharray="10,12" 
-              style={{ pathLength: smoothProgress }}
-              className="opacity-90"
+            <motion.path
+              d="M 50,450 C 200,450 250,280 350,280 C 450,280 500,430 650,430 C 780,430 550,130 680,130 C 780,130 800,220 950,220"
+              stroke="#ffffff"
+              strokeWidth="1.5"
+              strokeDasharray="10,12"
+              style={{ pathLength: pathProgress }}
+              className="opacity-95"
               strokeLinecap="round"
             />
           </svg>
@@ -243,9 +283,9 @@ export default function EducationRoadmap() {
           {milestones.map((m) => {
             const colors = getColorClasses(m.color)
             const Icon = m.icon
-            
-            // A pin is unlocked when the scroll path has crossed its threshold
-            const isUnlocked = scrollVal >= m.threshold
+
+            // A pin is unlocked when the scroll path has crossed its threshold (SSC is unlocked by default)
+            const isUnlocked = m.id === "ssc" || maxScrollVal >= m.threshold
             const isSelected = displayMilestone.id === m.id
 
             return (
@@ -260,41 +300,63 @@ export default function EducationRoadmap() {
               >
                 {/* Animated pin container popping in when unlocked */}
                 <motion.div
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={isUnlocked ? { scale: 1, opacity: 1 } : { scale: 0, opacity: 0 }}
-                  transition={{ type: "spring", stiffness: 100, damping: 14 }}
+                  initial={{ scale: 0.5, opacity: 0 }}
+                  animate={{
+                    scale: isUnlocked ? 1 : 0.85,
+                    opacity: isUnlocked ? 1 : 0.5
+                  }}
+                  transition={{ type: "spring", stiffness: 120, damping: 15 }}
                   className="relative"
                 >
-                  {/* Deviating radiating circles animation for active current phase (B.Tech 2023-2027) */}
-                  {m.id === "btech" && (
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none -translate-y-5">
-                      <span className="absolute w-20 h-20 rounded-full border border-blue-500/50 animate-[ping_1.8s_cubic-bezier(0,0,0.2,1)_infinite]" />
-                      <span className="absolute w-20 h-20 rounded-full border border-blue-500/30 animate-[ping_1.8s_cubic-bezier(0,0,0.2,1)_infinite] [animation-delay:0.4s]" />
-                      <span className="absolute w-20 h-20 rounded-full border border-blue-500/15 animate-[ping_1.8s_cubic-bezier(0,0,0.2,1)_infinite] [animation-delay:0.8s]" />
+                  {/* Glowing concentric rings animation for selected/active pin */}
+                  {isUnlocked && isSelected && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none -translate-y-[22px]">
+                      <span className={`absolute w-16 h-16 rounded-full border-2 ${colors.border}/40 animate-[ping_2s_cubic-bezier(0,0,0.2,1)_infinite]`} />
+                      <span className={`absolute w-20 h-20 rounded-full border ${colors.border}/25 animate-[ping_2s_cubic-bezier(0,0,0.2,1)_infinite] [animation-delay:0.5s]`} />
                     </div>
                   )}
 
-                  <button
-                    onMouseEnter={() => setHoveredMilestone(m)}
-                    onMouseLeave={() => setHoveredMilestone(null)}
-                    onClick={() => setActiveMilestone(m)}
-                    className="relative flex flex-col items-center cursor-pointer focus:outline-none"
+                  {/* Pulsing ring for the active current phase B.Tech */}
+                  {m.id === "btech" && !isSelected && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none -translate-y-5">
+                      <span className="absolute w-14 h-14 rounded-full border border-blue-500/40 animate-[ping_2s_cubic-bezier(0,0,0.2,1)_infinite]" />
+                    </div>
+                  )}
+
+                  <motion.button
+                    onMouseEnter={() => isUnlocked && setHoveredMilestone(m)}
+                    onMouseLeave={() => isUnlocked && setHoveredMilestone(null)}
+                    onClick={() => isUnlocked && handleMilestoneClick(m)}
+                    disabled={!isUnlocked}
+                    whileHover={isUnlocked ? {
+                      scale: 1.12,
+                      y: -6,
+                      transition: { type: "spring", stiffness: 400, damping: 15 }
+                    } : {}}
+                    whileTap={isUnlocked ? { scale: 0.95 } : {}}
+                    className={`relative flex flex-col items-center focus:outline-none group ${isUnlocked ? "cursor-pointer" : "cursor-not-allowed"}`}
                   >
                     {/* Floating tooltip preview above the pin */}
-                    <div className={`absolute bottom-full mb-3 px-3 py-1 text-[10px] font-mono font-bold tracking-wider rounded-lg border shadow-lg ${isSelected ? `${colors.bg} text-black border-transparent scale-105` : "bg-card text-text-secondary border-border/80"} transition-all duration-300 pointer-events-none whitespace-nowrap`}>
-                      {m.year}
-                    </div>
+                    {isUnlocked && (
+                      <div className={`absolute bottom-full mb-3 px-3 py-1 text-[10px] font-mono font-bold tracking-wider rounded-lg border shadow-lg ${isSelected ? `${colors.bg} text-black border-transparent scale-105` : "bg-card text-text-secondary border-border/80"} transition-all duration-300 pointer-events-none whitespace-nowrap z-30`}>
+                        {m.year}
+                      </div>
+                    )}
 
                     {/* Animated pin drop circle wrapper */}
-                    <div className={`w-14 h-14 rounded-full border-2 ${isSelected ? `${colors.border} bg-card scale-110 shadow-[0_0_20px_rgba(16,185,129,0.3)] ${colors.glow}` : "border-border bg-card hover:scale-105"} transition-all duration-300 flex items-center justify-center relative z-10`}>
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white ${isSelected ? colors.bg : "bg-muted text-text-secondary"} transition-colors duration-300`}>
-                        <Icon className="size-5" />
+                    <div className={`w-14 h-14 rounded-full border-2 ${isUnlocked && isSelected ? `${colors.border} bg-card scale-110 shadow-[0_0_20px_rgba(16,185,129,0.3)] ${colors.glow}` : "border-border bg-card"} transition-all duration-300 flex items-center justify-center relative z-10`}>
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white ${isUnlocked ? (isSelected ? colors.bg : "bg-muted text-text-secondary") : "bg-muted/40 text-text-muted/40"} transition-colors duration-300`}>
+                        {isUnlocked ? (
+                          <Icon className="size-5 group-hover:rotate-12 transition-transform duration-300" />
+                        ) : (
+                          <div className="w-2.5 h-2.5 rounded-full bg-border" />
+                        )}
                       </div>
                     </div>
 
                     {/* Pin pointer triangle */}
-                    <div className={`w-3 h-3 rotate-45 border-r-2 border-b-2 ${isSelected ? `${colors.border} bg-card` : "border-border bg-card"} -mt-1.5 transition-all duration-300 relative z-10`} />
-                  </button>
+                    <div className={`w-3 h-3 rotate-45 border-r-2 border-b-2 ${isUnlocked && isSelected ? `${colors.border} bg-card` : "border-border bg-card"} -mt-1.5 transition-all duration-300 relative z-10`} />
+                  </motion.button>
                 </motion.div>
               </div>
             )
@@ -302,15 +364,18 @@ export default function EducationRoadmap() {
 
           {/* Helper guide pointer */}
           <div className="absolute bottom-4 left-6 font-mono text-[9px] text-text-muted flex items-center gap-1.5 uppercase select-none">
-            <FiStar className="size-3 text-accent animate-pulse" /> Details rendered dynamically in side module.
+            <FiStar className="size-3 text-accent animate-pulse" /> Interactive SVG roadmap. Click unlocked nodes to draw path!
           </div>
         </div>
 
-        {/* Right column: The details HUD panel (Matches roadmap height perfectly, never overlaps pins) */}
+        {/* Right column: The details HUD panel */}
         <div className="col-span-4 bg-card border border-border/80 rounded-[32px] p-6 shadow-[6px_6px_0px_#000000] dark:shadow-[6px_6px_0px_var(--accent)] text-left relative overflow-hidden flex flex-col justify-between h-[520px] transition-all duration-300">
           {/* Subtle color bar indicator */}
-          <div className={`absolute top-0 left-0 w-2 h-full ${getColorClasses(displayMilestone.color).bg}`} />
-          
+          <div className={`absolute top-0 left-0 w-2.5 h-full ${getColorClasses(displayMilestone.color).bg} transition-colors duration-500`} />
+
+          {/* Dynamic background glow matching the milestone theme */}
+          <div className={`absolute -right-24 -top-24 w-52 h-52 rounded-full blur-3xl opacity-20 transition-all duration-700 pointer-events-none ${getColorClasses(displayMilestone.color).bg}`} />
+
           <AnimatePresence mode="wait">
             <motion.div
               key={displayMilestone.id}
@@ -318,20 +383,27 @@ export default function EducationRoadmap() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -15 }}
               transition={{ duration: 0.25 }}
-              className="flex flex-col justify-between h-full"
+              className="flex flex-col justify-between h-full relative z-10"
             >
               <div className="flex flex-col gap-4">
                 <div className="flex justify-between items-center gap-2 flex-wrap">
-                  <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-mono font-bold border uppercase tracking-wider ${getColorClasses(displayMilestone.color).bgLight} ${getColorClasses(displayMilestone.color).text} ${getColorClasses(displayMilestone.color).borderLight}`}>
-                    {displayMilestone.badge}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-mono font-bold border uppercase tracking-wider ${getColorClasses(displayMilestone.color).bgLight} ${getColorClasses(displayMilestone.color).text} ${getColorClasses(displayMilestone.color).borderLight}`}>
+                      {displayMilestone.badge}
+                    </span>
+                    {hoveredMilestone && (
+                      <span className="px-2 py-0.5 rounded-full text-[8px] font-mono font-bold bg-accent/10 text-accent border border-accent/25 animate-pulse uppercase tracking-wider">
+                        PREVIEW
+                      </span>
+                    )}
+                  </div>
                   <span className="text-[10px] font-mono text-text-muted">{displayMilestone.year}</span>
                 </div>
-                
+
                 <h3 className="text-heading-2 font-black text-foreground uppercase tracking-tight leading-tight mt-1">
                   {displayMilestone.title}
                 </h3>
-                
+
                 <div className="font-mono text-caption text-text-secondary leading-normal">
                   <span className="font-bold text-foreground">{displayMilestone.institution}</span>
                   <br />
@@ -345,7 +417,7 @@ export default function EducationRoadmap() {
 
               <div className="bg-muted/40 border border-border/60 p-4 rounded-xl flex flex-col gap-1 mt-auto shadow-inner select-none">
                 <span className="text-[9px] font-mono text-text-muted uppercase tracking-wider">Performance Metric</span>
-                <span className={`text-lg md:text-xl font-bold font-mono tracking-tight uppercase ${getColorClasses(displayMilestone.color).text}`}>
+                <span className={`text-lg md:text-xl font-bold font-mono tracking-tight uppercase ${getColorClasses(displayMilestone.color).text} transition-colors duration-500`}>
                   {displayMilestone.score}
                 </span>
               </div>
@@ -359,9 +431,13 @@ export default function EducationRoadmap() {
         {milestones.map((m, idx) => {
           const colors = getColorClasses(m.color)
           const Icon = m.icon
-          
+
           return (
-            <div key={m.id} className="relative flex flex-col gap-3 pb-4 border-b border-border/40 last:border-b-0">
+            <motion.div
+              key={m.id}
+              whileTap={{ scale: 0.98 }}
+              className="relative flex flex-col gap-3 pb-4 border-b border-border/40 last:border-b-0"
+            >
               {/* Absolute Pin Node on the line */}
               <span className={`absolute -left-[37px] top-1 w-7 h-7 rounded-full flex items-center justify-center ${colors.bg} text-white shadow-lg`}>
                 <Icon className="size-3.5" />
@@ -390,7 +466,7 @@ export default function EducationRoadmap() {
                 <span className="text-[10px] font-mono text-text-muted uppercase">Performance Metric:</span>
                 <span className={`text-[10px] font-mono font-black ${colors.text}`}>{m.score}</span>
               </div>
-            </div>
+            </motion.div>
           )
         })}
       </div>

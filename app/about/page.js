@@ -25,6 +25,7 @@ import { navigation } from "@/data/navigation"
 import { variants, transitions } from "@/config/animations"
 import EducationRoadmap from "../components/EducationRoadmap"
 import OrbitalSkills from "../components/OrbitalSkills"
+import CertificationsShowcase from "../components/CertificationsShowcase"
 
 export default function AboutPage() {
   const { theme, setTheme, resolvedTheme } = useTheme()
@@ -259,6 +260,11 @@ export default function AboutPage() {
         {/* Education Journey Roadmap Section */}
         <section className="flex flex-col gap-8">
           <EducationRoadmap />
+        </section>
+
+        {/* Certifications Showcase Section */}
+        <section className="flex flex-col gap-8">
+          <CertificationsShowcase />
         </section>
 
       </main>
