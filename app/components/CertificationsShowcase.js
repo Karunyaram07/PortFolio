@@ -18,7 +18,7 @@ const iconMap = {
   TbCertificate: TbCertificate
 }
 
-export default function CertificationsShowcase() {
+export default function CertificationsShowcase({ limit }) {
   // Merge certifications and achievements dynamically
   const unifiedItems = React.useMemo(() => {
     const list = [
@@ -48,13 +48,15 @@ export default function CertificationsShowcase() {
       }))
     ]
     // Sort primarily by priority ascending, then by year descending
-    return list.sort((a, b) => {
+    const sorted = list.sort((a, b) => {
       if (a.priority !== b.priority) {
         return a.priority - b.priority
       }
       return b.year - a.year
     })
-  }, [])
+
+    return limit ? sorted.slice(0, limit) : sorted
+  }, [limit])
 
   return (
     <div className="flex flex-col gap-8 w-full text-left">

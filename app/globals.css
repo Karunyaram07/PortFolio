@@ -59,7 +59,7 @@
 
 :root {
   /* Light Mode - Sleek Slate Off-White and Emerald-Teal accents */
-  --background: oklch(0.985 0.003 220);
+  --background: oklch(0.98 0.005 165);
   --foreground: oklch(0.12 0.008 220);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.12 0.008 220);
@@ -98,6 +98,12 @@
 
   --gradient-start: oklch(0.12 0.008 220);
   --gradient-end: oklch(45.046% 0.19292 343.341);
+
+  /* Blob palette — light mode needs more saturation/opacity to read
+     against the near-white background (oklch 0.98 lightness) */
+  --blob-color-1: oklch(45.046% 0.19292 343.341 / 22%);
+  --blob-color-2: oklch(0.55 0.18 260 / 16%);
+  --blob-blur: 90px;
 }
 
 .dark {
@@ -140,6 +146,12 @@
 
   --gradient-start: oklch(0.96 0.004 220);
   --gradient-end: oklch(0.72 0.16 165);
+
+  /* Blob palette — dark background already has contrast, so blobs can
+     run softer/lower opacity and still read clearly as a glow */
+  --blob-color-1: oklch(0.72 0.16 165 / 18%);
+  --blob-color-2: oklch(0.6 0.18 300 / 14%);
+  --blob-blur: 110px;
 }
 
 @layer base {
@@ -149,6 +161,9 @@
 
   body {
     @apply bg-background text-foreground;
+    background-image: radial-gradient(var(--border) 1.2px, transparent 1.2px);
+    background-size: 28px 28px;
+    background-attachment: fixed;
   }
 
   html {
@@ -341,4 +356,77 @@
   background: linear-gradient(to bottom, rgba(99, 102, 241, 0.4) 0%, rgba(99, 102, 241, 0) 100%);
   animation: scan 4s linear infinite;
   pointer-events: none;
+}
+
+/* Ambient background float animations */
+@keyframes float-slow-1 {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(40px, -60px) scale(1.08);
+  }
+  66% {
+    transform: translate(-25px, 25px) scale(0.96);
+  }
+}
+
+@keyframes float-slow-2 {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  50% {
+    transform: translate(-50px, 50px) scale(1.12);
+  }
+}
+
+/* -------------------------------------------------------------------
+   Ambient Blob Background Utilities
+   -------------------------------------------------------------------
+   Two soft, colored, blurred circles that float slowly behind hero-type
+   sections. Colors/opacity are tuned per theme via --blob-color-1/2
+   above, since a value that glows nicely on a near-black dark background
+   will just vanish on the near-white light background, and vice versa.
+
+   USAGE (inside a `relative` positioned section wrapper):
+
+     <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
+       <div className="blob blob-1" />
+       <div className="blob blob-2" />
+     </div>
+
+   The parent needs `relative` + `overflow-hidden` so the blobs stay
+   clipped to that section instead of bleeding across the whole page.
+   ------------------------------------------------------------------- */
+.blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(var(--blob-blur));
+  will-change: transform;
+}
+
+.blob-1 {
+  top: -10%;
+  left: 5%;
+  width: 26rem;
+  height: 26rem;
+  background: var(--blob-color-1);
+  animation: float-slow-1 16s ease-in-out infinite;
+}
+
+.blob-2 {
+  bottom: -15%;
+  right: 0%;
+  width: 22rem;
+  height: 22rem;
+  background: var(--blob-color-2);
+  animation: float-slow-2 20s ease-in-out infinite;
+  animation-delay: -4s;
+}
+
+/* Respect users who've asked for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .blob {
+    animation: none;
+  }
 }

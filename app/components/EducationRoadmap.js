@@ -64,7 +64,7 @@ const milestones = [
     id: "research",
     year: "2025 - 2026",
     title: "Research & Publication",
-    institution: "",
+    institution: " ",
     location: "",
     score: "ICTIEE 2026 Accept",
     description: "Co-authored research on Prompt Engineering Pedagogy (PEARL) accepted at ICTIEE 2026. Handled radar/LiDAR sensor fusion data utilizing nuScenes datasets.",

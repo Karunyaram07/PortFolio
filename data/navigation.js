@@ -12,7 +12,7 @@ export const navigation = [
   },
   {
     label: "About",
-    href: "/about",
+    href: "/#biography",
   },
   {
     label: "Projects",

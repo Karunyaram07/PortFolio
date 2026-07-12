@@ -13,7 +13,13 @@ import {
   FiRotateCcw,
   FiCheckCircle,
   FiArrowRight,
-  FiAward
+  FiAward,
+  FiLock,
+  FiUnlock,
+  FiMapPin,
+  FiCalendar,
+  FiBookOpen,
+  FiBriefcase
 } from "react-icons/fi"
 import {
   TbSparkles,
@@ -22,10 +28,16 @@ import {
   TbActivityHeartbeat
 } from "react-icons/tb"
 
+// Import custom components
+import EducationRoadmap from "./components/EducationRoadmap"
+import OrbitalSkills from "./components/OrbitalSkills"
+import CertificationsShowcase from "./components/CertificationsShowcase"
+
 // Import real data
 import { profile } from "@/data/profile"
 import { projects } from "@/data/projects"
 import { experience } from "@/data/experience"
+import { education } from "@/data/education"
 import { navigation } from "@/data/navigation"
 
 export default function Home() {
@@ -38,6 +50,16 @@ export default function Home() {
   // Interactive 3D Tilt state for the profile photo
   const [tiltStyle, setTiltStyle] = React.useState("rotate3d(1, -1, 1, 15deg)")
 
+  // State to lock the photo card in a vertical position on click
+  const [isStuck, setIsStuck] = React.useState(false)
+
+  // Live telemetry logs state for the terminal widget
+  const [telemetryLogs, setTelemetryLogs] = React.useState([
+    { text: ">> Initializing profile connection...", type: "info" },
+    { text: ">> Loading credentials... [OK]", type: "success" },
+    { text: ">> Mapping B.Tech CSE telemetry...", type: "info" }
+  ])
+
   // Canvas ref for background LiDAR coordinate network
   const canvasRef = React.useRef(null)
 
@@ -45,6 +67,30 @@ export default function Home() {
     const timer = setTimeout(() => setMounted(true), 0)
     return () => clearTimeout(timer)
   }, [])
+
+  React.useEffect(() => {
+    if (!mounted) return
+    const feed = [
+      "loading Google Genkit AI modules...",
+      "compiling static portfolio pathways...",
+      "active internship search: listening...",
+      "LiDAR/radar metrics synced successfully",
+      "indexing co-authored research paper...",
+      "active focus: full-stack AI dev loop",
+      "HappySoul digital companion in progress",
+      "Green Track complaint workflow active"
+    ]
+    let idx = 0
+    const interval = setInterval(() => {
+      setTelemetryLogs(prev => {
+        const next = [...prev, { text: `>> ${feed[idx % feed.length]}`, type: "info" }]
+        if (next.length > 5) next.shift()
+        return next
+      })
+      idx++
+    }, 3800)
+    return () => clearInterval(interval)
+  }, [mounted])
 
   // LiDAR particle network logic
   React.useEffect(() => {
@@ -240,9 +286,6 @@ export default function Home() {
   // Marquee SIH project
   const sihProject = projects.find(p => p.id === "edupath")
 
-  // Other projects grid
-  const otherProjects = projects.filter(p => p.id !== "edupath" && p.featured)
-
   return (
     <div className="min-h-screen bg-background text-foreground transition-colors duration-300 antialiased selection:bg-accent/30 selection:text-foreground">
 
@@ -323,37 +366,65 @@ export default function Home() {
           {/* Right side: Animated Profile Photo Card */}
           <div className="lg:col-span-5 flex justify-center items-center py-6 relative z-10">
             <div
-              className="relative w-80 h-96 rounded-3xl cursor-pointer"
+              className="group relative w-[350px] h-[440px] rounded-3xl cursor-pointer"
               style={{ perspective: "1000px" }}
               onMouseMove={(e) => {
+                if (isStuck) return
                 const rect = e.currentTarget.getBoundingClientRect()
                 const x = e.clientX - rect.left - rect.width / 2
                 const y = e.clientY - rect.top - rect.height / 2
                 // Dynamic tilt and hover scale shift
                 setTiltStyle(`rotate3d(${-y / 15}, ${x / 15}, 0, 18deg) scale3d(1.03, 1.03, 1.03)`)
               }}
-              onMouseLeave={() => setTiltStyle("rotate3d(1, -1, 1, 15deg) scale3d(1, 1, 1)")}
+              onMouseLeave={() => {
+                if (isStuck) return
+                setTiltStyle("rotate3d(1, -1, 1, 15deg) scale3d(1, 1, 1)")
+              }}
+              onClick={() => {
+                setIsStuck(prev => {
+                  const next = !prev
+                  if (next) {
+                    // Lock the card in a straight vertical position (no tilt)
+                    setTiltStyle("rotate3d(0, 0, 0, 0deg) scale3d(1.03, 1.03, 1.03)")
+                  } else {
+                    // Reset to default tilt state
+                    setTiltStyle("rotate3d(1, -1, 1, 15deg) scale3d(1, 1, 1)")
+                  }
+                  return next
+                })
+              }}
             >
               <div
-                className="absolute inset-0 bg-gradient-to-tr from-accent/20 to-purple-500/10 border border-border/80 rounded-3xl p-3 flex flex-col justify-between shadow-2xl transition-all duration-300 hover:border-accent hover:shadow-[0_0_35px_rgba(16,185,129,0.25)]"
+                className="absolute inset-0 rounded-3xl overflow-hidden shadow-2xl transition-all duration-300 hover:shadow-[0_0_35px_rgba(16,185,129,0.25)] animate-glow"
                 style={{
                   transformStyle: "preserve-3d",
                   transform: tiltStyle,
-                  transition: "transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease, box-shadow 0.4s ease"
+                  transition: "transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease"
                 }}
               >
-                {/* Photo frame */}
-                <div className="w-full h-full rounded-2xl overflow-hidden relative" style={{ transform: "translateZ(30px)" }}>
-                  <img
-                    src={profile.profileImagePath}
-                    alt={profile.fullName}
-                    className="w-full h-full object-cover filter grayscale contrast-[1.08] hover:grayscale-0 transition-all duration-700"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent flex items-end p-4">
-                    <div>
-                      <h4 className="font-bold text-caption tracking-tight text-foreground uppercase">{profile.fullName}</h4>
-                      <p className="text-[10px] font-mono text-text-muted mt-0.5">{profile.professionalTitle}</p>
-                    </div>
+                {/* Visual click-to-try lock state indicator badge */}
+                <div className="absolute top-4 right-4 z-20 flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/10 text-white/90 font-mono text-[9px] uppercase tracking-widest select-none shadow-lg">
+                  {isStuck ? (
+                    <>
+                      <FiLock className="size-3 text-accent animate-pulse" /> TELEMETRY LOCKED
+                    </>
+                  ) : (
+                    <>
+                      <FiUnlock className="size-3 text-white/50 animate-bounce" /> CLICK TO LOCK
+                    </>
+                  )}
+                </div>
+
+                <img
+                  src={profile.profileImagePath}
+                  alt={profile.fullName}
+                  className={`w-full h-full object-cover filter contrast-[1.08] group-hover:scale-110 transition-all duration-700 ease-out ${isStuck ? "grayscale-0" : "grayscale group-hover:grayscale-0"
+                    }`}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent flex items-end p-4">
+                  <div>
+                    <h4 className="font-bold text-caption tracking-tight text-foreground uppercase">{profile.fullName}</h4>
+                    <p className="text-[10px] font-mono text-text-muted mt-0.5">{profile.professionalTitle}</p>
                   </div>
                 </div>
               </div>
@@ -361,303 +432,375 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Section 2: Narrative Biography Preview */}
-        <section id="biography" className="grid grid-cols-1 lg:grid-cols-12 gap-8 border-t border-border/40 pt-16">
-          <div className="lg:col-span-4 lg:sticky lg:top-24">
-            <span className="text-caption font-mono text-accent uppercase tracking-widest">01 // THE NARRATIVE</span>
-            <h2 className="text-heading-1 font-bold mt-1 text-foreground font-serif">About Me</h2>
+        {/* Section 2: Biography & System Telemetry Grid */}
+        <section id="biography" className="grid grid-cols-1 lg:grid-cols-12 gap-12 border-t border-border/40 pt-16 scroll-mt-24">
+
+          {/* Left column: Narrative Bio & Contact Info in Brutalist Card */}
+          <div className="lg:col-span-8 flex flex-col gap-6">
+            <div>
+              <span className="text-caption font-mono text-accent uppercase tracking-widest font-bold">01 // THE NARRATIVE</span>
+              <h2 className="text-heading-1 font-bold mt-1 text-foreground font-serif flex items-center gap-2">About Me <FiBookOpen className="size-6 text-accent animate-pulse" /></h2>
+            </div>
+
+            <div className="border-4 border-foreground bg-card p-8 shadow-[10px_10px_0px_var(--accent)] relative overflow-hidden transition-all duration-300 hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[12px_12px_0px_var(--accent)] flex flex-col gap-6 text-left">
+              {/* Header */}
+              <div className="flex items-center gap-3 border-b-2 border-foreground pb-4 select-none">
+                <div className="flex-shrink-0 flex items-center justify-center bg-foreground p-1 text-background rounded-sm">
+                  <FiBookOpen className="size-4 text-accent" />
+                </div>
+                <span className="font-black text-foreground uppercase tracking-widest font-mono text-[11px]">
+                  BIOGRAPHY_DATA
+                </span>
+              </div>
+
+              {/* Bio paragraphs */}
+              <div className="flex flex-col gap-5 text-body text-foreground leading-relaxed font-sans font-light">
+                {profile.bioParagraphs.map((para, idx) => {
+                  if (idx === profile.bioParagraphs.length - 1) {
+                    return (
+                      <p key={idx}>
+                        If that sounds like a fit, reach me at{" "}
+                        <a href="mailto:sprkarunya986@gmail.com" className="text-accent underline font-semibold hover:brightness-110">
+                          sprkarunya986@gmail.com
+                        </a>{" "}
+                        or send a{" "}
+                        <Link href="/contact" className="text-accent underline font-bold hover:brightness-110">
+                          connection request here
+                        </Link>
+                        . I reply.
+                      </p>
+                    )
+                  }
+                  return <p key={idx}>{para}</p>
+                })}
+              </div>
+
+              {/* Contact info footer */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t-2 border-foreground pt-6 mt-2">
+                <div className="flex items-center gap-3 text-caption font-mono text-foreground font-bold">
+                  <FiMapPin className="size-4 text-accent animate-pulse" />
+                  <span>{profile.location.toUpperCase()}</span>
+                </div>
+                <div className="flex items-center gap-3 text-caption font-mono text-foreground font-bold">
+                  <FiMail className="size-4 text-accent" />
+                  <a href={`mailto:${profile.email}`} className="hover:underline">{profile.email.toUpperCase()}</a>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="lg:col-span-8 flex flex-col gap-6 text-body text-text-secondary font-light font-sans leading-relaxed">
-            {profile.bioParagraphs.map((para, idx) => {
-              if (idx === profile.bioParagraphs.length - 1) {
-                return (
-                  <p key={idx}>
-                    If that sounds like a fit, reach me at{" "}
-                    <a href="mailto:sprkarunya986@gmail.com" className="text-accent underline font-semibold hover:brightness-110">
-                      sprkarunya986@gmail.com
-                    </a>{" "}
-                    or send a{" "}
-                    <Link href="/contact" className="text-accent underline font-bold hover:brightness-110">
-                      connection request here
-                    </Link>
-                    . I reply here.
-                  </p>
-                )
-              }
-              return <p key={idx}>{para}</p>
-            })}
+
+          {/* Right column: Live Telemetry terminal widget, Diagnostics, & Quick Metrics in Cyber-Brutalist style */}
+          <div className="lg:col-span-4 flex flex-col items-stretch justify-end gap-6 lg:sticky lg:top-24 w-full h-full min-h-[500px]">
+
+            {/* Adapted Brutalist Telemetry Card */}
+            <div className="w-full border-4 border-foreground bg-card p-6 shadow-[10px_10px_0px_var(--accent)] text-left font-mono relative overflow-hidden transition-all duration-300 hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[12px_12px_0px_var(--accent)]">
+              {/* Header */}
+              <div className="flex items-center gap-3 border-b-2 border-foreground pb-4 mb-6 select-none">
+                <div className="flex-shrink-0 flex items-center justify-center bg-foreground p-1 text-background rounded-sm">
+                  <TbRadar className="size-4 animate-spin text-accent" />
+                </div>
+                <span className="font-black text-foreground uppercase tracking-widest text-[11px]">
+                  TELEMETRY_CORE
+                </span>
+              </div>
+
+              {/* Logs Feed */}
+              <div className="flex flex-col gap-3 h-28 overflow-hidden font-mono border-b-2 border-foreground pb-4 mb-6">
+                {telemetryLogs.map((log, idx) => (
+                  <motion.div
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    key={idx}
+                    className={`leading-tight font-semibold uppercase tracking-wider text-[10px] ${log.type === "success" ? "text-accent" : "text-foreground"
+                      }`}
+                  >
+                    {log.text}
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Action Button */}
+              <div className="mt-2">
+                <button
+                  onClick={() => {
+                    setTelemetryLogs([
+                      { text: ">> REBOOTING TELEMETRY SYSTEMS...", type: "info" },
+                      { text: ">> CLEARING LOCAL BUFFER... [OK]", type: "success" },
+                      { text: ">> INITIALIZING CONNECTION...", type: "info" }
+                    ])
+                  }}
+                  className="w-full py-2.5 text-center font-bold text-caption uppercase border-2 border-foreground bg-foreground text-background dark:bg-background dark:text-foreground relative transition-all duration-200 hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[4px_4px_0px_var(--accent)] active:translate-x-1 active:translate-y-1 active:shadow-none shadow-[2px_2px_0px_var(--accent)]"
+                >
+                  REBOOT CORE
+                </button>
+              </div>
+            </div>
+
+            {/* Diagnostics Port Card (Fills white space) */}
+            <div className="w-full border-2 border-foreground bg-card p-5 shadow-[4px_4px_0px_var(--accent)] text-left font-mono relative overflow-hidden transition-all duration-300 hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_var(--accent)]">
+              <div className="flex items-center gap-2 border-b border-foreground pb-2 mb-3 select-none">
+                <span className="font-bold text-foreground uppercase tracking-widest text-[9px] flex items-center gap-1.5">
+                  <span className="size-1.5 rounded-full bg-accent animate-pulse" /> DIAGNOSTICS_PORT
+                </span>
+              </div>
+              <div className="flex flex-col gap-2 text-[9px]">
+                <div className="flex justify-between items-center border-b border-border/20 pb-1">
+                  <span className="text-text-muted">HAPPYSOUL COMPANION</span>
+                  <span className="text-accent font-bold">94% COMPRESSED</span>
+                </div>
+                <div className="flex justify-between items-center border-b border-border/20 pb-1">
+                  <span className="text-text-muted">GREEN TRACK COMPLAINTS</span>
+                  <span className="text-accent font-bold">100% STABLE</span>
+                </div>
+                <div className="flex justify-between items-center border-b border-border/20 pb-1">
+                  <span className="text-text-muted">SENSOR FUSION SYSTEM</span>
+                  <span className="text-accent font-bold">ACTIVE</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-text-muted">LIDAR RADAR NETWORKS</span>
+                  <span className="text-accent font-bold">SYNCED</span>
+                </div>
+              </div>
+
+              {/* Animating Wave Scanline */}
+              <div className="relative h-6 bg-black/10 dark:bg-black/40 border border-foreground/20 rounded-md overflow-hidden mt-3 flex items-center justify-center">
+                <svg className="w-full h-full opacity-60" viewBox="0 0 100 20" preserveAspectRatio="none">
+                  <path
+                    d="M 0,10 Q 10,0 20,10 T 40,10 T 60,10 T 80,10 T 100,10"
+                    fill="none"
+                    stroke="var(--accent)"
+                    strokeWidth="1"
+                    strokeDasharray="4 2"
+                  />
+                </svg>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-accent/15 to-transparent animate-[scan_2s_ease-in-out_infinite]" />
+              </div>
+            </div>
+
+            {/* Quick Metrics Grid in Brutalist style */}
+            <div className="w-full grid grid-cols-2 gap-6 font-mono text-center">
+              <div className="p-5 border-2 border-foreground bg-card shadow-[4px_4px_0px_var(--accent)] flex flex-col justify-between min-h-24 select-none hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_var(--accent)] transition-all">
+                <span className="text-heading-2 font-black text-foreground">{profile.currentCGPA}</span>
+                <span className="text-[8px] text-text-muted uppercase tracking-wider font-bold">CGPA_SCORE</span>
+              </div>
+              <div className="p-5 border-2 border-foreground bg-card shadow-[4px_4px_0px_var(--accent)] flex flex-col justify-between min-h-24 select-none hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_var(--accent)] transition-all">
+                <span className="text-heading-2 font-black text-foreground">SIH &apos;25</span>
+                <span className="text-[8px] text-text-muted uppercase tracking-wider font-bold">GRAND_CHAMP</span>
+              </div>
+              <div className="p-5 border-2 border-foreground bg-card shadow-[4px_4px_0px_var(--accent)] flex flex-col justify-between min-h-24 select-none hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_var(--accent)] transition-all">
+                <span className="text-heading-2 font-black text-foreground">1</span>
+                <span className="text-[8px] text-text-muted uppercase tracking-wider font-bold">PUB_PAPER</span>
+              </div>
+              <div className="p-5 border-2 border-foreground bg-card shadow-[4px_4px_0px_var(--accent)] flex flex-col justify-between min-h-24 select-none hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_var(--accent)] transition-all">
+                <span className="text-heading-2 font-black text-foreground">4+</span>
+                <span className="text-[8px] text-text-muted uppercase tracking-wider font-bold">SYS_DEPLOYS</span>
+              </div>
+            </div>
           </div>
         </section>
 
-        {/* Section 3: Selected Work (Neobrutalist mockup cards layout + Spotlight SIH Project) */}
-        <section id="projects" className="flex flex-col gap-16 border-t border-border/40 pt-16">
+        {/* Section 3: Selected Work */}
+        <section id="projects" className="flex flex-col gap-12 border-t border-border/40 pt-16 scroll-mt-24">
           <div className="flex justify-between items-baseline pb-4">
             <div>
               <span className="text-caption font-mono text-accent uppercase tracking-widest">02 // SELECTED WORK</span>
-              <h2 className="text-heading-1 font-bold mt-1 text-foreground font-serif">Featured System Integrations</h2>
+              <h2 className="text-heading-1 font-bold mt-1 text-foreground font-serif flex items-center gap-2">Featured System Integration <FiBriefcase className="size-6 text-accent animate-bounce" /></h2>
             </div>
             <Link href="/projects" className="font-mono text-caption text-accent hover:underline flex items-center gap-1 font-bold">
               ALL WORK <FiArrowRight className="size-3.5" />
             </Link>
           </div>
 
-          {/* Grid of the three featured projects first */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {otherProjects.map((project) => {
+          {/* Quick glance of remaining projects before the SIH */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {projects.filter(p => p.id !== "edupath").map((project) => {
               const isInProgress = project.status === "In Progress"
-
               return (
                 <div
                   key={project.id}
-                  onClick={() => {
-                    if (isInProgress) {
-                      setInProgressProject(project)
-                    } else if (project.demo) {
-                      window.open(project.demo, "_blank")
-                    }
-                  }}
-                  className="bg-card border border-border/80 rounded-[24px] p-4 shadow-[6px_6px_0px_#000000] dark:shadow-[6px_6px_0px_var(--accent)] flex flex-col justify-between gap-5 group hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[8px_8px_0px_#000000] dark:hover:shadow-[8px_8px_0px_var(--accent)] transition-all duration-300 cursor-pointer"
+                  className="border-2 border-foreground bg-card p-5 shadow-[4px_4px_0px_var(--accent)] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_var(--accent)] transition-all duration-300 flex flex-col justify-between gap-4 text-left relative overflow-hidden"
                 >
-                  <div className="flex flex-col gap-4">
-                    {/* Image container inside the card */}
-                    <div className="w-full aspect-[16/10] overflow-hidden rounded-[18px] border border-border/40 relative bg-muted/20">
-                      <img
-                        src={project.image}
-                        alt={project.title}
-                        className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500"
-                      />
+                  <div className="flex flex-col gap-2">
+                    <div className="flex justify-between items-baseline">
+                      <span className="text-[9px] font-mono font-bold text-purple-600 dark:text-purple-400 uppercase tracking-widest">
+                        {project.category}
+                      </span>
                       {isInProgress && (
-                        <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center">
-                          <span className="px-3 py-1 bg-accent/90 text-accent-foreground text-[10px] font-mono font-bold tracking-widest rounded-full uppercase animate-pulse">
-                            In Progress
-                          </span>
-                        </div>
+                        <span className="text-[8px] font-mono text-accent uppercase font-bold tracking-widest">IN_PROGRESS</span>
                       )}
                     </div>
-
-                    <div className="flex flex-col gap-1.5 px-1">
-                      <div className="flex justify-between items-baseline">
-                        <span className="text-[11px] font-mono font-bold text-purple-600 dark:text-purple-400 uppercase tracking-widest">
-                          {project.category}
-                        </span>
-                        {isInProgress && (
-                          <span className="text-[9px] font-mono text-accent uppercase font-bold tracking-wider">DEV_STAGE</span>
-                        )}
-                      </div>
-                      <h3 className="text-heading-2 font-black tracking-tight text-foreground uppercase group-hover:text-accent transition-colors">
-                        {project.title}
-                      </h3>
-                      <p className="text-small text-text-secondary leading-relaxed font-sans font-light">
-                        {project.description}
-                      </p>
-                    </div>
-
-                    {/* Highlights list */}
-                    <div className="flex flex-col gap-1.5 px-1 mt-2">
-                      {project.highlights.slice(0, 4).map((hl, hIdx) => (
-                        <div key={hIdx} className="flex gap-2 items-start text-caption text-text-secondary leading-tight">
-                          <span className="text-accent font-bold mt-0.5">&bull;</span>
-                          <span className="font-sans font-light text-[11px]">{hl}</span>
-                        </div>
-                      ))}
-                    </div>
+                    <h3 className="text-body font-black tracking-tight text-foreground uppercase">
+                      {project.title}
+                    </h3>
+                    <p className="text-small text-text-secondary leading-relaxed font-sans font-light line-clamp-3">
+                      {project.description}
+                    </p>
                   </div>
-
-                  <div className="flex flex-col gap-3">
-                    {/* Tech badges */}
-                    <div className="flex flex-wrap gap-1.5 pt-3 border-t border-border/40 px-1">
-                      {project.techStack.map((tech, tIdx) => (
-                        <span key={tIdx} className="text-[9px] font-mono bg-muted text-text-secondary px-2.5 py-0.5 rounded-full border border-border/40">
-                          {tech}
-                        </span>
-                      ))}
-                    </div>
-
-                    {/* Neobrutalist Visit & Github link buttons */}
-                    <div className="flex justify-between items-center px-1 pt-3 border-t border-border/40">
-                      {isInProgress ? (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            setInProgressProject(project)
-                          }}
-                          className="underline font-mono text-caption text-foreground hover:text-accent font-bold"
-                        >
-                          Visit Details
-                        </button>
-                      ) : project.demo ? (
-                        <a
-                          href={project.demo}
-                          target="_blank"
-                          rel="noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="underline font-mono text-caption text-foreground hover:text-accent font-bold"
-                        >
-                          Visit Live
-                        </a>
-                      ) : (
-                        <span className="font-mono text-caption text-text-muted italic text-[11px]">Prototype</span>
-                      )}
-
-                      {project.github && (
-                        <a
-                          href={project.github}
-                          target="_blank"
-                          rel="noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="text-foreground hover:text-accent transition-colors"
-                        >
-                          <FiGithub className="size-5" />
-                        </a>
-                      )}
-                    </div>
+                  <div className="border-t border-border/40 pt-3 flex justify-between items-center mt-2">
+                    <span className="text-[9px] font-mono text-text-muted">EST: {project.year}</span>
+                    <Link
+                      href="/projects"
+                      className="text-caption font-mono text-accent hover:underline font-bold flex items-center gap-1 uppercase"
+                    >
+                      DETAILS <FiArrowRight className="size-3" />
+                    </Link>
                   </div>
                 </div>
               )
             })}
           </div>
 
-          {/* Spotlight Marquee Card: EduPath Navigator (Smart India Hackathon Winner) below the grid */}
+          {/* Shortened Marquee Card: EduPath Navigator (Smart India Hackathon Winner) */}
           {sihProject && (
-            <div className="relative group rounded-[28px] border-2 border-amber-500/80 dark:border-amber-400 bg-amber-500/[0.02] dark:bg-amber-400/[0.02] p-8 shadow-[8px_8px_0px_#f59e0b] hover:shadow-[10px_10px_0px_#f59e0b] transition-all duration-300 overflow-hidden flex flex-col gap-8 w-full col-span-full">
+            <div className="relative group rounded-[24px] border-4 border-amber-500 bg-amber-500/[0.01] dark:bg-amber-400/[0.01] p-6 shadow-[8px_8px_0px_#f59e0b] hover:shadow-[10px_10px_0px_#f59e0b] hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all duration-300 overflow-hidden flex flex-col gap-6 w-full text-left">
               {/* Animating glow overlay */}
               <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 via-transparent to-amber-500/5 opacity-50 pointer-events-none group-hover:scale-105 transition-transform duration-700" />
 
-              <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 border-b border-amber-500/30 pb-4 relative z-10">
-                <div className="flex flex-wrap items-center gap-3">
-                  <span className="px-3 py-1 bg-amber-500 text-black font-mono text-[10px] font-black tracking-widest rounded-full uppercase flex items-center gap-1">
-                    <FiAward className="size-3.5 animate-bounce" /> SIH &apos;25 GRAND FINALE WINNER
-                  </span>
-                  <span className="text-caption font-mono text-amber-600 dark:text-amber-400 font-bold uppercase tracking-wider">
-                    {sihProject.category}
-                  </span>
-                </div>
-                <span className="text-caption font-mono text-text-muted">STAGE: COMPLETE (FUTURE UPDATES PLANNED)</span>
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b-2 border-amber-500/30 pb-4 relative z-10">
+                <span className="px-3 py-1 bg-amber-500 text-black font-mono text-[9px] font-black tracking-widest rounded-sm uppercase flex items-center gap-1 select-none">
+                  <FiAward className="size-3.5 animate-bounce" /> SIH &apos;25 CHAMPION
+                </span>
+                <span className="text-caption font-mono text-amber-600 dark:text-amber-400 font-bold uppercase tracking-wider">
+                  {sihProject.category}
+                </span>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative z-10">
-                {/* Left logo column */}
-                <div className="lg:col-span-3 flex flex-col items-center gap-4">
-                  <div className="w-40 h-40 rounded-[24px] border-2 border-amber-500/40 p-4 bg-white/80 dark:bg-black/60 shadow-lg flex items-center justify-center group-hover:scale-105 transition-transform duration-500">
-                    <img
-                      src={sihProject.image}
-                      alt={sihProject.title}
-                      className="max-w-full max-h-full object-contain filter drop-shadow-md animate-pulse"
-                    />
-                  </div>
-                  <span className="text-[10px] font-mono text-amber-600 dark:text-amber-400 font-bold">ESTABLISHED: {sihProject.year}</span>
+              <div className="flex flex-col md:flex-row gap-6 items-center relative z-10">
+                <div className="w-24 h-24 rounded-[18px] border-2 border-amber-500/40 p-2 bg-white/90 dark:bg-black/60 shadow-md flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform duration-500">
+                  <img
+                    src={sihProject.image}
+                    alt={sihProject.title}
+                    className="max-w-full max-h-full object-contain filter drop-shadow-md"
+                  />
                 </div>
 
-                {/* Right details column */}
-                <div className="lg:col-span-9 flex flex-col gap-6">
-                  <div className="flex flex-col gap-2">
-                    <h3 className="text-display-sm font-black tracking-tight text-foreground uppercase group-hover:text-amber-500 transition-colors">
-                      {sihProject.title}
-                    </h3>
-                    <p className="text-body text-text-secondary leading-relaxed font-sans font-light">
-                      {sihProject.longDescription}
-                    </p>
-                  </div>
-
-                  {/* Highlights list */}
-                  <div className="flex flex-col gap-2.5 bg-background/50 dark:bg-black/40 border border-amber-500/20 p-6 rounded-2xl">
-                    <span className="text-[10px] font-mono text-amber-600 dark:text-amber-400 font-bold uppercase tracking-widest">🧠 CORE CAPABILITIES</span>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
-                      {sihProject.highlights.map((hl, hIdx) => (
-                        <div key={hIdx} className="flex gap-2 items-start text-caption text-text-secondary leading-tight">
-                          <span className="text-amber-500 font-bold mt-0.5">&bull;</span>
-                          <span className="font-sans font-light text-[11.5px]">{hl}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Dedicated My Contribution & Impact block */}
-                  <div className="flex flex-col gap-2.5 bg-amber-500/[0.03] border border-amber-500/25 p-6 rounded-2xl">
-                    <span className="text-[10px] font-mono text-amber-600 dark:text-amber-400 font-bold uppercase tracking-widest flex items-center gap-1">
-                      👤 MY CONTRIBUTION & CONVERSION IMPACT
-                    </span>
-                    <div className="flex flex-col gap-3 font-sans text-caption text-text-secondary leading-relaxed font-light mt-1">
-                      <p>
-                        <strong>Frontend Architecture & User Hook:</strong> Crafted an immersive, accessible landing experience designed to captivate guests instantly. By showcasing success stories and milestones on the landing page, the frontend creates a visual narrative that drives higher engagement and guides guest users to log in at{" "}
-                        <a href="https://sih-final-imps.vercel.app" target="_blank" rel="noreferrer" className="text-amber-600 dark:text-amber-400 underline font-semibold hover:brightness-110">
-                          sih-final-imps.vercel.app
-                        </a>.
-                      </p>
-                      <p>
-                        <strong>CareerMitra Chatbot Integration:</strong> Integrated and styled the conversational interface for the <em>CareerMitra</em> AI counseling agent, utilizing Genkit pipelines to provide responsive career guidance to students.
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Tech stack */}
-                  <div className="flex flex-wrap gap-1.5">
-                    {sihProject.techStack.map((tech, tIdx) => (
-                      <span key={tIdx} className="text-[9px] font-mono bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20 px-2.5 py-0.5 rounded-full">
-                        {tech}
-                      </span>
-                    ))}
-                  </div>
-
-                  <div className="flex flex-wrap gap-4 border-t border-amber-500/20 pt-4 mt-2">
-                    {sihProject.demo && (
-                      <a
-                        href={sihProject.demo}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="px-5 py-2 bg-amber-500 text-black border-2 border-amber-500 hover:bg-transparent hover:text-amber-500 dark:hover:text-amber-400 font-mono text-caption tracking-wider rounded-xl transition-all flex items-center gap-1.5 font-bold"
-                      >
-                        <FiArrowRight className="size-4" /> VISIT LIVE SYSTEM
-                      </a>
-                    )}
-                    {sihProject.github && (
-                      <a
-                        href={sihProject.github}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="px-5 py-2 border-2 border-amber-500/60 text-amber-600 dark:text-amber-400 hover:border-amber-500 hover:bg-amber-500/10 font-mono text-caption tracking-wider rounded-xl transition-all flex items-center gap-1.5 font-bold"
-                      >
-                        <FiGithub className="size-4" /> COMPILED REPOSITORY
-                      </a>
-                    )}
-                  </div>
+                <div className="flex flex-col gap-2">
+                  <h3 className="text-heading-2 font-black tracking-tight text-foreground uppercase group-hover:text-amber-500 transition-colors">
+                    {sihProject.title}
+                  </h3>
+                  <p className="text-body text-text-secondary leading-relaxed font-sans font-light">
+                    {sihProject.description}
+                  </p>
                 </div>
+              </div>
+
+              <div className="flex justify-between items-center border-t-2 border-amber-500/30 pt-4 relative z-10">
+                <div className="flex gap-4">
+                  {sihProject.demo && (
+                    <a
+                      href={sihProject.demo}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-caption font-mono text-amber-600 dark:text-amber-400 hover:underline font-bold text-[11px]"
+                    >
+                      LIVE SYSTEM
+                    </a>
+                  )}
+                  {sihProject.github && (
+                    <a
+                      href={sihProject.github}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-caption font-mono text-amber-600 dark:text-amber-400 hover:underline font-bold text-[11px]"
+                    >
+                      REPOSITORY
+                    </a>
+                  )}
+                </div>
+                <Link
+                  href="/projects"
+                  className="text-caption font-mono text-amber-600 dark:text-amber-400 hover:underline font-bold flex items-center gap-1 uppercase text-[11px]"
+                >
+                  VIEW DETAILS <FiArrowRight className="size-3" />
+                </Link>
               </div>
             </div>
           )}
+
+          {/* Centered CTA button below the card */}
+          <div className="flex justify-center mt-4">
+            <Link
+              href="/projects"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-accent text-accent-foreground font-mono text-caption tracking-widest rounded-full hover:brightness-105 transition-all font-bold uppercase shadow-lg shadow-accent/20"
+            >
+              Explore All Projects <FiArrowRight className="size-4" />
+            </Link>
+          </div>
+        </section>
+
+        {/* Section 3.5: Professional Experience */}
+        <section id="experience" className="flex flex-col gap-8 border-t border-border/40 pt-16 scroll-mt-24">
+          <div>
+            <span className="text-caption font-mono text-accent uppercase tracking-widest">CHAPTERS</span>
+            <h2 className="text-heading-1 font-bold mt-1 text-foreground font-serif flex items-center gap-2">Professional Experience <FiAward className="size-6 text-accent animate-pulse" /></h2>
+          </div>
+
+          <div className="relative pl-8 border-l border-border/80 flex flex-col gap-12">
+            {experience.map((exp, idx) => (
+              <div key={idx} className="relative flex flex-col gap-3">
+                {/* Dot marker */}
+                <span className="absolute -left-[41px] top-1 size-5 rounded-full bg-background border-4 border-accent" />
+
+                <div className="flex justify-between items-baseline gap-2 flex-wrap">
+                  <h3 className="text-heading-2 font-bold text-foreground">{exp.role}</h3>
+                  <span className="text-caption font-mono text-accent font-semibold">{exp.duration}</span>
+                </div>
+                <p className="text-body font-mono text-text-secondary font-semibold">{exp.company} &bull; {exp.location}</p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                  {exp.description.map((desc, dIdx) => (
+                    <div key={dIdx} className="p-4 bg-muted/40 border border-border/60 rounded-2xl text-small text-text-secondary leading-relaxed font-sans font-light">
+                      {desc}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {exp.technologies.map((tech, tIdx) => (
+                    <span key={tIdx} className="text-caption font-mono bg-muted/60 text-text-secondary px-3 py-1 rounded-full border border-border/40 text-[10px]">
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         </section>
 
         {/* Section 4: Telemetry Log & Academic Metrics */}
         <section id="research" className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start border-t border-border/40 pt-16">
 
           {/* Left panel: Academic Focus and ICTIEE Accept */}
-          <div className="lg:col-span-6 flex flex-col gap-8">
+          <div className="lg:col-span-6 flex flex-col gap-6">
             <div>
               <span className="text-caption font-mono text-accent uppercase tracking-widest">03 // RESEARCH PROJECTS</span>
-              <h2 className="text-heading-1 font-bold mt-1 text-foreground font-serif">Academics & Publications</h2>
+              <h2 className="text-heading-1 font-bold mt-1 text-foreground font-serif flex items-center gap-2">Academics & Publications <FiAward className="size-6 text-accent animate-bounce" /></h2>
             </div>
 
-            <div className="p-8 border border-border glass rounded-3xl flex flex-col gap-6">
-              <span className="text-caption font-mono text-[#10b981] bg-[#10b981]/10 border border-[#10b981]/25 px-3 py-1 rounded-sm self-start font-bold uppercase tracking-wider">
-                ICTIEE 2026 Accept
-              </span>
-              <h3 className="text-heading-2 font-bold tracking-tight text-foreground leading-snug">
-                PEARL: Prompt Engineering Pedagogy for Teaching and Learning of Specific Technologies
-              </h3>
-              <p className="text-body text-text-secondary leading-relaxed font-light font-sans">
-                Designing prompt structures systematically in EdTech contexts, validating metrics, and developing companion tutor sandboxes (PEARL Tutor) to optimize engineering learner loops.
-              </p>
-            </div>
-
-            {/* Dashboard Mini Metrics cards */}
-            <div className="grid grid-cols-2 gap-4 font-mono text-center">
-              <div className="p-5 border border-border bg-[#0b0c10]/5 dark:bg-[#ffffff]/[0.02] rounded-2xl flex flex-col justify-between min-h-24">
-                <span className="text-heading-1 font-black text-accent">{profile.currentCGPA}</span>
-                <span className="text-[10px] text-text-muted uppercase tracking-widest">CGPA_SCORE</span>
+            <div className="p-8 border border-border bg-[#0b0c10]/5 dark:bg-[#ffffff]/[0.02] rounded-3xl flex flex-col gap-6 w-full text-left">
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="text-caption font-mono text-[#10b981] bg-[#10b981]/10 border border-[#10b981]/25 px-3 py-1 rounded-sm font-bold uppercase tracking-wider">
+                  ICTIEE 2026 Accept
+                </span>
+                <span className="text-[10px] font-mono text-text-muted">CO-AUTHOR</span>
               </div>
-              <div className="p-5 border border-border bg-[#0b0c10]/5 dark:bg-[#ffffff]/[0.02] rounded-2xl flex flex-col justify-between min-h-24">
-                <span className="text-heading-1 font-black text-accent">SIH &apos;25</span>
-                <span className="text-[10px] text-text-muted uppercase tracking-widest">SIH_WINNER</span>
+              <div className="flex flex-col gap-3">
+                <h3 className="text-heading-2 font-black tracking-tight text-foreground leading-snug uppercase">
+                  PEARL: Prompt Engineering Pedagogy for Teaching and Learning of Specific Technologies
+                </h3>
+                <p className="text-body text-text-secondary leading-relaxed font-light font-sans">
+                  Designing prompt structures systematically in EdTech contexts, validating metrics, and developing companion tutor sandboxes (PEARL Tutor) to optimize engineering learner loops.
+                </p>
+              </div>
+              <div className="flex gap-4 border-t border-border/40 pt-4 mt-2">
+                <a
+                  href="https://www.linkedin.com/posts/prabhu-ram-karunya-sunkara-11986528a_ictiee-2026-research-presentation-certificate-ugcPost-7438313456425996288-oMWl/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="underline font-mono text-caption text-foreground hover:text-accent font-bold"
+                >
+                  View Publication Details
+                </a>
               </div>
             </div>
           </div>
@@ -696,7 +839,34 @@ export default function Home() {
 
         </section>
 
-        {/* Section 5: Contact CTA */}
+        {/* Section 5: Orbital Skills */}
+        <section id="skills" className="flex flex-col gap-8 border-t border-border/40 pt-16 scroll-mt-24">
+          <OrbitalSkills />
+        </section>
+
+        {/* Section 6: Education Journey */}
+        <section id="education" className="flex flex-col gap-8 border-t border-border/40 pt-16 scroll-mt-24">
+          <EducationRoadmap />
+        </section>
+
+        {/* Section 7: Verifications & Certificates */}
+        <section id="certifications" className="flex flex-col gap-8 border-t border-border/40 pt-16 scroll-mt-24">
+          <div>
+            <span className="text-caption font-mono text-accent uppercase tracking-widest font-bold">CREDENTIALS</span>
+            <h2 className="text-heading-1 font-bold mt-1 text-foreground font-serif flex items-center gap-2">Certificates <FiCheckCircle className="size-6 text-accent animate-pulse" /></h2>
+          </div>
+          <CertificationsShowcase limit={3} />
+          <div className="flex justify-center mt-4">
+            <Link
+              href="/credentials"
+              className="inline-flex items-center gap-2 px-6 py-3 border border-border bg-card rounded-2xl hover:border-accent hover:shadow-[4px_4px_0px_var(--accent)] text-caption font-mono text-foreground hover:text-accent font-bold transition-all uppercase"
+            >
+              View All Certificates <FiArrowRight className="size-4" />
+            </Link>
+          </div>
+        </section>
+
+        {/* Section 8: Contact CTA */}
         <section id="contact" className="border border-border bg-[#0b0c10]/5 dark:bg-[#ffffff]/[0.02] p-8 rounded-3xl flex flex-col md:flex-row justify-between items-start md:items-center gap-8 font-mono">
           <div className="flex flex-col gap-2">
             <span className="text-caption text-accent uppercase tracking-widest font-bold">CONTACT_TRIGGER</span>
@@ -708,7 +878,7 @@ export default function Home() {
             href="/contact"
             className="px-6 py-3 bg-accent text-accent-foreground hover:brightness-105 font-bold text-caption rounded-full tracking-widest flex items-center gap-2 transition-all uppercase"
           >
-            CONNECT DIRECTLY &rarr;
+            CONNECT DIRECTLY {"\u2192"}
           </Link>
         </section>
 

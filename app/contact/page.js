@@ -308,8 +308,8 @@ export default function ContactPage() {
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
           <p>&copy; {new Date().getFullYear()} Sunkara Prabhu Ram Karunya. All rights reserved.</p>
           <div className="flex gap-6">
-            <a href="https://github.com/sprkarunya986" target="_blank" rel="noreferrer" className="hover:text-foreground">GITHUB</a>
-            <a href="https://linkedin.com/in/sprkarunya986" target="_blank" rel="noreferrer" className="hover:text-foreground">LINKEDIN</a>
+            <a href="https://github.com/karunyaram07" target="_blank" rel="noreferrer" className="hover:text-foreground">GITHUB</a>
+            <a href="https://www.linkedin.com/in/prabhu-ram-karunya-sunkara-11986528a" target="_blank" rel="noreferrer" className="hover:text-foreground">LINKEDIN</a>
           </div>
         </div>
       </footer>
