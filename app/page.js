@@ -953,7 +953,7 @@ export default function Home() {
           <p>&copy; {new Date().getFullYear()} Sunkara Prabhu Ram Karunya. All rights reserved.</p>
           <div className="flex gap-6">
             <a href="https://github.com/Karunyaram07" target="_blank" rel="noreferrer" className="hover:text-foreground">GITHUB</a>
-            <a href="https://www.linkedin.com/in/prabhu-ram-sunkara-95b627295/" target="_blank" rel="noreferrer" className="hover:text-foreground">LINKEDIN</a>
+            <a href="https://www.linkedin.com/in/prabhu-ram-karunya-sunkara-11986528a" target="_blank" rel="noreferrer" className="hover:text-foreground">LINKEDIN</a>
           </div>
         </div>
       </footer>
