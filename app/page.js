@@ -768,7 +768,7 @@ export default function Home() {
         </section>
 
         {/* Section 4: Telemetry Log & Academic Metrics */}
-        <section id="research" className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start border-t border-border/40 pt-16">
+        <section id="research" className="grid grid-cols-1 lg:grid-cols-12 gap-8 border-t border-border/40 pt-16 items-stretch">
 
           {/* Left panel: Academic Focus and ICTIEE Accept */}
           <div className="lg:col-span-6 flex flex-col gap-6">
@@ -793,7 +793,7 @@ export default function Home() {
                 </p>
               </div>
               <div className="flex gap-4 border-t border-border/40 pt-4 mt-2">
-                <a
+                <a 
                   href="https://www.linkedin.com/posts/prabhu-ram-karunya-sunkara-11986528a_ictiee-2026-research-presentation-certificate-ugcPost-7438313456425996288-oMWl/"
                   target="_blank"
                   rel="noreferrer"
@@ -806,7 +806,7 @@ export default function Home() {
           </div>
 
           {/* Right panel: High-Tech Telemetry logs console */}
-          <div className="lg:col-span-6 flex flex-col gap-6">
+          <div className="lg:col-span-6 flex flex-col justify-end gap-6 h-full w-full pb-1">
             <span className="text-caption font-mono text-text-muted uppercase tracking-widest">TELEMETRY SYSTEM</span>
 
             <div className="bg-[#040508] border border-border rounded-2xl overflow-hidden shadow-xl font-mono text-caption">
