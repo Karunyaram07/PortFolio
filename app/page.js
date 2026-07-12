@@ -793,7 +793,7 @@ export default function Home() {
                 </p>
               </div>
               <div className="flex gap-4 border-t border-border/40 pt-4 mt-2">
-                <a 
+                <a
                   href="https://www.linkedin.com/posts/prabhu-ram-karunya-sunkara-11986528a_ictiee-2026-research-presentation-certificate-ugcPost-7438313456425996288-oMWl/"
                   target="_blank"
                   rel="noreferrer"

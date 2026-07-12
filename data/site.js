@@ -14,9 +14,9 @@
 
 /** @type {SiteConfig} */
 export const siteConfig = {
-  name: "Sunkara Prabhu Ram Karunya Portfolio",
-  title: "Sunkara Prabhu Ram Karunya | Software Engineer",
-  description: "Personal website and portfolio of Sunkara Prabhu Ram Karunya, highlighting AI integrations, research projects, and full-stack software development experience.",
+  name: "Prabhu Ram Karunya Portfolio",
+  title: "Prabhu Ram Karunya | Software Engineer",
+  description: "Personal website and portfolio of Prabhu Ram Karunya, highlighting AI integrations, research projects, and full-stack software development experience.",
   keywords: [
     "Sunkara Prabhu Ram Karunya",
     "Karunya Portfolio",
