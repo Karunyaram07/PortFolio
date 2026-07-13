@@ -3,6 +3,7 @@
 import * as React from "react"
 import { ThemeProvider } from "./theme-provider"
 import { ReactLenis } from "lenis/react"
+import { Toaster } from "@/components/ui/sonner"
 import "lenis/dist/lenis.css"
 
 /**
@@ -20,6 +21,7 @@ export function Providers({ children }) {
     >
       <ReactLenis root options={{ lerp: 0.1, duration: 1.2, syncTouch: true }}>
         {children}
+        <Toaster />
       </ReactLenis>
     </ThemeProvider>
   )

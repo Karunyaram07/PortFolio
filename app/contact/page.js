@@ -18,6 +18,8 @@ import {
 import { TbSparkles } from "react-icons/tb"
 import { profile } from "@/data/profile"
 import { navigation } from "@/data/navigation"
+import { sendEmail } from "@/app/actions/sendEmail"
+import { toast } from "sonner"
 
 export default function ContactPage() {
   const { theme, setTheme, resolvedTheme } = useTheme()
@@ -55,17 +57,31 @@ export default function ContactPage() {
     return <div className="p-8 text-center font-mono text-text-muted">Loading contact...</div>
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!formData.name || !formData.email || !formData.message) return
+    if (!formData.name || !formData.email || !formData.message) {
+      toast.error("Please fill out all required fields.")
+      return
+    }
 
     setFormState("sending")
+    const toastId = toast.loading("Transmitting message...")
 
-    // Simulate sending progress
-    setTimeout(() => {
-      setFormState("success")
-      setFormData({ name: "", email: "", subject: "", message: "" })
-    }, 1500)
+    try {
+      const result = await sendEmail(formData)
+      if (result.success) {
+        toast.success(result.message || "Message transmitted successfully!", { id: toastId })
+        setFormState("success")
+        setFormData({ name: "", email: "", subject: "", message: "" })
+      } else {
+        toast.error(result.message || "Failed to send message. Please try again.", { id: toastId })
+        setFormState("idle")
+      }
+    } catch (err) {
+      console.error("Contact form error:", err)
+      toast.error("An unexpected error occurred. Please try again.", { id: toastId })
+      setFormState("idle")
+    }
   }
 
   const handleChange = (e) => {
